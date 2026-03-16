@@ -12,6 +12,7 @@ Requires-Dist: openpyxl
 Requires-Dist: rasterio
 Requires-Dist: affine
 Requires-Dist: opencv-python
+Requires-Dist: pyproj
 Dynamic: author
 Dynamic: license-file
 Dynamic: requires-dist

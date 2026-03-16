@@ -262,11 +262,6 @@ def FFP(zm=None, z0=None, umean=None, h=None, ol=None, sigmav=None, ustar=None,
     y = np.concatenate((y_neg[0:-1], y_pos))
     f = np.concatenate((f_neg[:, :-1].T, f_pos.T)).T
 
-    # #Matrices for output
-    # x_2d = np.tile(x[:,None], (1,len(y)))
-    # y_2d = np.tile(y.T,(len(x),1))
-    # f_2d = f
-    # 1. 首先生成基础网格 (你之前检查过的那段)
     # Matrices for output
     x_2d = np.tile(x[:,None], (1,len(y)))
     y_2d = np.tile(y.T,(len(x),1))
@@ -294,34 +289,6 @@ def FFP(zm=None, z0=None, umean=None, h=None, ol=None, sigmav=None, ustar=None,
             xrs = []
             yrs = []
             xrs,yrs = get_contour_vertices(x_2d, y_2d, f_2d, clevs[0][2])
-
-    # 2. 紧接着进行旋转 (替换掉原有的旋转代码)
-    #===========================================================================
-    # 旋转逻辑 (将足迹对准地理风向)
-    if wind_dir is not None:
-        # 将角度转为弧度
-        wind_dir_rad = wind_dir * np.pi / 180.
-        
-        # 计算极坐标
-        dist = np.sqrt(x_2d**2 + y_2d**2)
-        angle = np.arctan2(y_2d, x_2d)
-        
-        # 重新映射坐标 (标准地理/数学坐标映射)
-        # 注意：这里的 np.pi/2 偏移量取决于你的风向定义是否 0度为北
-        x_2d = dist * np.cos(wind_dir_rad + angle + np.pi/2) 
-        y_2d = dist * np.sin(wind_dir_rad + angle + np.pi/2)
-
-        # 同样需要旋转白线(等值线)的顶点坐标，否则白线和阴影会错位
-        if rs is not None:
-            for ix, r in enumerate(rs):
-                xr_lev = np.array([px for px in xrs[ix] if px is not None])    
-                yr_lev = np.array([py for py in yrs[ix] if py is not None])    
-                dist_r = np.sqrt(xr_lev**2 + yr_lev**2)
-                angle_r = np.arctan2(yr_lev, xr_lev)
-                
-                # 使用相同的逻辑旋转白线顶点
-                xrs[ix] = list(dist_r * np.cos(wind_dir_rad + angle_r + np.pi/2))
-                yrs[ix] = list(dist_r * np.sin(wind_dir_rad + angle_r + np.pi/2))
                 
     #===========================================================================
     # Crop domain and footprint to the largest rs value

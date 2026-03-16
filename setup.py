@@ -14,6 +14,7 @@ setup(
         "rasterio",   
         "affine",
         "opencv-python",
+        "pyproj",
     ],
     author="Rui Gao, Mohammad Safeeq, and Joshua H. Viers",
     description="A Python tool for Kljun flux footprint modeling for research purposes.",
