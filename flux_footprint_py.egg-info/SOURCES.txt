@@ -4,6 +4,7 @@ setup.py
 flux_footprint/__init__.py
 flux_footprint/core.py
 flux_footprint/kljun_ffp.py
+flux_footprint/utils.py
 flux_footprint_py.egg-info/PKG-INFO
 flux_footprint_py.egg-info/SOURCES.txt
 flux_footprint_py.egg-info/dependency_links.txt

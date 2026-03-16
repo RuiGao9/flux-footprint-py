@@ -10,6 +10,8 @@ Requires-Dist: scipy
 Requires-Dist: matplotlib
 Requires-Dist: openpyxl
 Requires-Dist: rasterio
+Requires-Dist: affine
+Requires-Dist: opencv-python
 Dynamic: author
 Dynamic: license-file
 Dynamic: requires-dist

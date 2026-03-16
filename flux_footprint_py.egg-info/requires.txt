@@ -4,3 +4,5 @@ scipy
 matplotlib
 openpyxl
 rasterio
+affine
+opencv-python
