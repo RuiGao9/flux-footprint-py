@@ -30,6 +30,11 @@ pip install "git+https://github.com/RuiGao9/flux-footprint-py.git"
 ```
 
 ## How to run this model
+`run_fpt_model.ipynb` is the main program you can edit
+- Call input (e.g., `example_meteo_days.txt` under `example_data` folder)
+- You can define the folder path in the first section
+- You can edit parameters in the second section
+- Call the footprint model under `flux_footprint` folder in the third section and generate the footprint raster data
 
 ## Reference
 <a name="ref1"></a>
