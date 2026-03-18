@@ -262,6 +262,12 @@ def FFP_climatology(zm=None, z0=None, umean=None, h=None, ol=None, sigmav=None, 
     valids = [True if not any([val is None for val in vals]) else False \
               for vals in zip(ustars, sigmavs, hs, ols, wind_dirs, zms)]
 
+    # GR: Adding error counter for invalid inputs, 
+    # GR: just want to get footprints when we have years of data 
+    # GR: and not have the function fail because of a few bad data points. 
+    error_count = 0         # GR: Counter for number of invalid input sets
+    skipped_indices = []    # GR: List to store indices of skipped footprints due to invalid inputs
+
     if verbosity > 1: print ('')
     for ix, (ustar, sigmav, h, ol, wind_dir, zm, z0, umean) \
             in enumerate(zip(ustars, sigmavs, hs, ols, wind_dirs, zms, z0s, umeans)):
@@ -276,68 +282,83 @@ def FFP_climatology(zm=None, z0=None, umean=None, h=None, ol=None, sigmav=None, 
         if not valids[ix]:
             raise_ffp_exception(16, verbosity)
         else:
-            #===========================================================================
-            # Rotate coordinates into wind direction
-            if wind_dir is not None:
-                rotated_theta = theta - wind_dir * np.pi / 180.
+            try:    # GR: Trying to calculate the footprint using the original code below
+                #===========================================================================
+                # Rotate coordinates into wind direction
+                if wind_dir is not None:
+                    rotated_theta = theta - wind_dir * np.pi / 180.
 
-            #===========================================================================
-            # Create real scale crosswind integrated footprint and dummy for
-            # rotated scaled footprint
-            fstar_ci_dummy = np.zeros(x_2d.shape)
-            f_ci_dummy = np.zeros(x_2d.shape)
-            xstar_ci_dummy = np.zeros(x_2d.shape)
-            px = np.ones(x_2d.shape)
-            if z0 is not None:
-                # Use z0
-                if ol <= 0 or ol >= oln:
-                    xx = (1 - 19.0 * zm/ol)**0.25
-                    psi_f = (np.log((1 + xx**2) / 2.) + 2. * np.log((1 + xx) / 2.) - 2. * np.arctan(xx) + np.pi/2)
-                elif ol > 0 and ol < oln:
-                    psi_f = -5.3 * zm / ol
-                if (np.log(zm / z0)-psi_f)>0:
-                    xstar_ci_dummy = (rho * np.cos(rotated_theta) / zm * (1. - (zm / h)) / (np.log(zm / z0) - psi_f))
+                #===========================================================================
+                # Create real scale crosswind integrated footprint and dummy for
+                # rotated scaled footprint
+                fstar_ci_dummy = np.zeros(x_2d.shape)
+                f_ci_dummy = np.zeros(x_2d.shape)
+                xstar_ci_dummy = np.zeros(x_2d.shape)
+                px = np.ones(x_2d.shape)
+                if z0 is not None:
+                    # Use z0
+                    if ol <= 0 or ol >= oln:
+                        xx = (1 - 19.0 * zm/ol)**0.25
+                        psi_f = (np.log((1 + xx**2) / 2.) + 2. * np.log((1 + xx) / 2.) - 2. * np.arctan(xx) + np.pi/2)
+                    elif ol > 0 and ol < oln:
+                        psi_f = -5.3 * zm / ol
+                    if (np.log(zm / z0)-psi_f)>0:
+                        xstar_ci_dummy = (rho * np.cos(rotated_theta) / zm * (1. - (zm / h)) / (np.log(zm / z0) - psi_f))
+                        px = np.where(xstar_ci_dummy > d)
+                        fstar_ci_dummy[px] = a * (xstar_ci_dummy[px] - d)**b * np.exp(-c / (xstar_ci_dummy[px] - d))
+                        f_ci_dummy[px] = (fstar_ci_dummy[px] / zm * (1. - (zm / h)) / (np.log(zm / z0) - psi_f))
+                    else:
+                        flag_err = 3
+                        valids[ix] = 0
+                else:
+                    # Use umean if z0 not available
+                    xstar_ci_dummy = (rho * np.cos(rotated_theta) / zm * (1. - (zm / h)) / (umean / ustar * k))
                     px = np.where(xstar_ci_dummy > d)
                     fstar_ci_dummy[px] = a * (xstar_ci_dummy[px] - d)**b * np.exp(-c / (xstar_ci_dummy[px] - d))
-                    f_ci_dummy[px] = (fstar_ci_dummy[px] / zm * (1. - (zm / h)) / (np.log(zm / z0) - psi_f))
-                else:
-                    flag_err = 3
-                    valids[ix] = 0
-            else:
-                # Use umean if z0 not available
-                xstar_ci_dummy = (rho * np.cos(rotated_theta) / zm * (1. - (zm / h)) / (umean / ustar * k))
-                px = np.where(xstar_ci_dummy > d)
-                fstar_ci_dummy[px] = a * (xstar_ci_dummy[px] - d)**b * np.exp(-c / (xstar_ci_dummy[px] - d))
-                f_ci_dummy[px] = (fstar_ci_dummy[px] / zm * (1. - (zm / h)) / (umean / ustar * k))
+                    f_ci_dummy[px] = (fstar_ci_dummy[px] / zm * (1. - (zm / h)) / (umean / ustar * k))
 
-            #===========================================================================
-            # Calculate dummy for scaled sig_y* and real scale sig_y
-            sigystar_dummy = np.zeros(x_2d.shape)
-            sigystar_dummy[px] = (ac * np.sqrt(bc * np.abs(xstar_ci_dummy[px])**2 / (1 +
-                                  cc * np.abs(xstar_ci_dummy[px]))))
+                #===========================================================================
+                # Calculate dummy for scaled sig_y* and real scale sig_y
+                sigystar_dummy = np.zeros(x_2d.shape)
+                sigystar_dummy[px] = (ac * np.sqrt(bc * np.abs(xstar_ci_dummy[px])**2 / (1 +
+                                    cc * np.abs(xstar_ci_dummy[px]))))
 
-            if abs(ol) > oln:
-                ol = -1E6
-            if ol <= 0:   #convective
-                scale_const = 1E-5 * abs(zm / ol)**(-1) + 0.80
-            elif ol > 0:  #stable
-                scale_const = 1E-5 * abs(zm / ol)**(-1) + 0.55
-            if scale_const > 1:
-                scale_const = 1.0
+                if abs(ol) > oln:
+                    ol = -1E6
+                if ol <= 0:   #convective
+                    scale_const = 1E-5 * abs(zm / ol)**(-1) + 0.80
+                elif ol > 0:  #stable
+                    scale_const = 1E-5 * abs(zm / ol)**(-1) + 0.55
+                if scale_const > 1:
+                    scale_const = 1.0
 
-            sigy_dummy = np.zeros(x_2d.shape)
-            sigy_dummy[px] = (sigystar_dummy[px] / scale_const * zm * sigmav / ustar)
-            sigy_dummy[sigy_dummy < 0] = np.nan
+                sigy_dummy = np.zeros(x_2d.shape)
+                sigy_dummy[px] = (sigystar_dummy[px] / scale_const * zm * sigmav / ustar)
+                sigy_dummy[sigy_dummy < 0] = np.nan
 
-            #===========================================================================
-            # Calculate real scale f(x,y)
-            f_2d = np.zeros(x_2d.shape)
-            f_2d[px] = (f_ci_dummy[px] / (np.sqrt(2 * np.pi) * sigy_dummy[px]) *
-                        np.exp(-(rho[px] * np.sin(rotated_theta[px]))**2 / ( 2. * sigy_dummy[px]**2)))
+                #===========================================================================
+                # Calculate real scale f(x,y)
+                f_2d = np.zeros(x_2d.shape)
+                f_2d[px] = (f_ci_dummy[px] / (np.sqrt(2 * np.pi) * sigy_dummy[px]) *
+                            np.exp(-(rho[px] * np.sin(rotated_theta[px]))**2 / ( 2. * sigy_dummy[px]**2)))
 
-            #===========================================================================
-            # Add to footprint climatology raster
-            fclim_2d = fclim_2d + f_2d;
+                #===========================================================================
+                # Add to footprint climatology raster
+                fclim_2d = fclim_2d + f_2d
+            
+            # GR: Catching potential errors during footprint calculation and skipping the current footprint
+            except (IndexError, ValueError, ZeroDivisionError) as e:    
+                error_count += 1
+                valids[ix] = False
+                skipped_indices.append(ix)
+                if verbosity > 1:
+                    # GR: Only print warning when meeting errors
+                    print(f"Warning: Row {ix} skipped due to calculation error: {str(e)}")
+                continue
+            
+    # GR: After loop, print summary of errors if any    
+    if error_count > 0:
+        print(f"\n[Summary] Total {ts_len} rows processed. {error_count} rows skipped due to errors.")
 
     #===========================================================================
     # Continue if at least one valid footprint was calculated

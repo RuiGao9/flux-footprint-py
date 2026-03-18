@@ -4,8 +4,6 @@ setup.py
 flux_footprint/__init__.py
 flux_footprint/calc_footprint_FFP.py
 flux_footprint/calc_footprint_FFP_climatology.py
-flux_footprint/core.py
-flux_footprint/kljun_ffp.py
 flux_footprint/utils.py
 flux_footprint_py.egg-info/PKG-INFO
 flux_footprint_py.egg-info/SOURCES.txt
