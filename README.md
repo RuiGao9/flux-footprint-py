@@ -50,4 +50,4 @@ Rui Gao, Khan, M., & Viers, J. (2026). flux-footprint-py: A Python Toolkit for t
 - Last update: 2026-03-17
 
 ## Contact inforamtion if issues were found
-Rui Gao: Rui.Ray.Gao@gmail.com or RuiGao@ucmerced.edu
+Rui Gao: <br>Rui.Ray.Gao@gmail.com or RuiGao@ucmerced.edu
