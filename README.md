@@ -43,7 +43,7 @@ pip install "git+https://github.com/RuiGao9/flux-footprint-py.git"
 3. Gao, R., A. Nassar, A. F. Torres-Rua, L. Hipps, M. Aboutalebi, W. A. White, M. Anderson, W. P. Kustas, M. M. Alsina, J. Alfieri, N. Dokoozlian, F. Gao, H. Nieto, L. McKee, J. H. Prueger, L. Sanchez, A. J. Mcelrone, N. B. Ortiz, I. Gowing, C. Coopmans (2021). Footprint area generating based on eddy covariance records, HydroShare, https://doi.org/10.4211/hs.9118e2c1034e40e4ba4721cd17702f70
 
 ## How to cite this work
-Rui Gao, Khan, M., & Viers, J. (2026). flux-footprint-py: A Python Toolkit for the Implementation of the Kljun Footprint Model (initials). Zenodo. https://doi.org/10.5281/zenodo.19076529
+Gao, R., Khan, M., & Viers, J. (2026). flux-footprint-py: A Python Toolkit for the Implementation of the Kljun Footprint Model (initials). Zenodo. https://doi.org/10.5281/zenodo.19076529
 
 ## Repository update information
 - Creation date: 2026-03-17
