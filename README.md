@@ -1,5 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19076529.svg)](https://doi.org/10.5281/zenodo.19076529)
-![Visitors Badge](https://visitor-badge.laobi.icu/badge?page_id=RuiGao9/flux-footprint-py)<br>
+![Stars](https://img.shields.io/github/stars/RuiGao9/flux-footprint-py?style=social)<br>
 
 ## flux-footprint-py: A Toolkit for Kljun-based Footprint Modeling
 Calculates spatial footprints for water-energy-carbon flux research using the Kljun et al. (2015) model, supporting monitoring of tower fetch at different temporal scales.A Python workflow for calculating and aggregating spatial footprints of water, energy, and carbon fluxes. Implements the Kljun (2015) model to monitor tower fetch across various temporal scales.
